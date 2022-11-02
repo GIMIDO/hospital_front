@@ -1,6 +1,28 @@
 import authService from "./authService";
 
-class CustomerService {
+
+class AppointmentService {
+
+    async put(id, data) {
+        let requestOptions = {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authService.getCookie('Token')
+            },
+            body: JSON.stringify(data),
+        };
+
+        return await fetch(`http://127.0.0.1:8000/api/v1/appointment/` + id, requestOptions)
+            .then(response => {
+            if (response.status == 403) {
+                window.location.assign("http://localhost:3000/");
+            }
+            else {
+                return response.json();
+            }
+        });
+    }
 
     async get(page) {
         let requestOptions = {
@@ -11,25 +33,7 @@ class CustomerService {
             },
         };
 
-        return await fetch(`http://127.0.0.1:8000/api/v1/customer/` + page, requestOptions).then(response => {
-            if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
-            }
-            else {
-                return response.json();
-            }
-        });
-    }
-
-    async delete(id) {
-        const requestOptions = {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Authorization': 'Bearer ' + authService.getCookie('Token')
-            },
-        };
-        return await fetch(`http://127.0.0.1:8000/api/v1/customer/` + id, requestOptions).then(response => {
+        return await fetch(`http://127.0.0.1:8000/api/v1/appointment/` + page, requestOptions).then(response => {
             if (response.status == 403) {
                 window.location.assign("http://localhost:3000/");
             }
@@ -45,10 +49,11 @@ class CustomerService {
             headers: {
                 'Content-Type': 'application/json;charset=UTF-8',
                 'Authorization': 'Bearer ' + authService.getCookie('Token')
+
             },
             body: JSON.stringify(data),
         };
-        return await fetch(`http://127.0.0.1:8000/api/v1/customer/`, requestOptions).then(response => {
+        return await fetch(`http://127.0.0.1:8000/api/v1/appointment/`, requestOptions).then(response => {
             if (response.status == 403) {
                 window.location.assign("http://localhost:3000/");
             }
@@ -58,18 +63,16 @@ class CustomerService {
         });
     }
 
-    async put(id, data) {
-        let requestOptions = {
-            method: 'PUT',
+    async delete(id) {
+        const requestOptions = {
+            method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer '+ authService.getCookie('Token')
-            },
-            body: JSON.stringify(data),
-        };
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Authorization': 'Bearer ' + authService.getCookie('Token')
 
-        return await fetch(`http://127.0.0.1:8000/api/v1/customer/` + id, requestOptions)
-            .then(response => {
+            },
+        };
+        return await fetch(`http://127.0.0.1:8000/api/v1/appointment/` + id, requestOptions).then(response => {
             if (response.status == 403) {
                 window.location.assign("http://localhost:3000/");
             }
@@ -80,4 +83,4 @@ class CustomerService {
     }
 }
 
-export default new CustomerService();
+export default new AppointmentService();

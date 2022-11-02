@@ -1,51 +1,50 @@
 import customerService from "../services/customerService";
-import { useRouter } from "next/router";
 import React, { useState, useEffect } from "react";
 
-const Customers = ({ customers }) => {
-  // const customerList = customers.customers;
 
+const Customers = () => {
+  
   const [customerList, setCustomers] = useState([]);
   const [id, setId] = useState(0);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+  const [page, setPage] = useState(1);
 
-  const router = useRouter();
-  const forceReload = () => {
-    router.reload();
-  };
 
-  const getListOfCustomers = async (page) => {
-    let data = await await customerService.get(page);
-
+  async function getListOfCustomers(page) {
+    let data = await customerService.get(page);
     setCustomers(data.customers);
   };
+
 
   const DeleteCustomer = async (id) => {
     let result = await customerService.delete(id);
     if (result.success != undefined) {
-      forceReload();
+      getListOfCustomers(page)
     }
   };
 
+
   const SaveData = async (e) => {
     e.preventDefault();
+
     if (id == 0) {
+
       let customer = {
         name: name,
         email: email,
         phone: phone,
         address: address,
       };
-
-      let data = {
-        customer: customer,
-      };
-
+      let data = { customer: customer };
+      
       await customerService.post(data);
+      getListOfCustomers(page)
+
     } else {
+
       let customer = {
         id: id,
         name: name,
@@ -53,14 +52,13 @@ const Customers = ({ customers }) => {
         phone: phone,
         address: address,
       };
-
-      let data = {
-        customer: customer,
-      };
+      let data = { customer: customer };
 
       await customerService.put(id, data);
+      getListOfCustomers(page)
     }
   };
+
 
   const ChangeCustomer = (customer) => {
     setId(customer.id);
@@ -70,6 +68,7 @@ const Customers = ({ customers }) => {
     setAddress(customer.address);
   };
 
+
   const reset = () => {
     setId(0);
     setName("");
@@ -77,15 +76,10 @@ const Customers = ({ customers }) => {
     setPhone("");
     setAddress("");
   };
+
+
   return (
     <div>
-      <button
-        onClick={(_) => {
-          getListOfCustomers("1");
-        }}
-      >
-        get customers
-      </button>
       <form onSubmit={SaveData}>
         <div>
           <label htmlFor="name">Name:</label>
@@ -142,7 +136,15 @@ const Customers = ({ customers }) => {
       </form>
 
       <h2>Customers:</h2>
-      <button onClick={forceReload}>reload</button>
+      <label htmlFor="email">set page</label>
+          <input
+            type={"numver"}
+            name="page"
+            value={page}
+            onChange={(e) => {
+              setPage(e.target.value);
+            }}
+          />
       <p>
         {customerList.map((user) => (
           <li key={user.id}>
@@ -175,17 +177,3 @@ const Customers = ({ customers }) => {
 };
 
 export default Customers;
-
-// export async function getServerSideProps() {
-//   let customers = await customerService.get("1");
-//   console.log(customers);
-
-//   if (!customers) {
-//     return {
-//       // ...
-//     };
-//   }
-//   return {
-//     props: { customers },
-//   };
-// }
