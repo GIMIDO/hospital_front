@@ -1,9 +1,10 @@
 import appointmentService from "../services/appointmentService";
 import React, { useState, useEffect } from "react";
+import authService from "../services/authService";
 
 
-const Appointments = () => {
-  const [appointmentList, setAppointments] = useState([]);
+const Appointments = ({appointment}) => {
+  const [appointmentList, setAppointments] = useState(appointment);
   const [employeeIds, setEmployeeIds] = useState([]);
   const [customerIds, setCustomerIds] = useState([]);
   const [id, setId] = useState(0);
@@ -206,3 +207,32 @@ const Appointments = () => {
 };
 
 export default Appointments;
+
+
+export async function getServerSideProps({req, res}) {
+  let role = await authService.getRole(req, res)
+
+  if (role === undefined) {
+    return {
+      redirect: {
+         permanent: true,
+         destination: '/'
+      }
+   }
+  }
+
+  let appointment = await appointmentService.get(1, req, res);
+  if (appointment.isRedirect) {
+    return {
+       redirect: {
+          permanent: true,
+          destination: '/'
+       }
+    }
+  }
+  else {
+    return {
+      props: {appointment:appointment.appointments}, 
+    }
+  }
+}

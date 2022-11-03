@@ -1,10 +1,11 @@
 import employeeService from "../services/employeeService";
 import React, { useState, useEffect } from "react";
+import authService from "../services/authService";
 
 
-const Employees = () => {
+const Employees = ({employee}) => {
 
-  const [employeeList, setEmployees] = useState([]);
+  const [employeeList, setEmployees] = useState(employee);
   const [ids, setIds] = useState([]);
   const [id, setId] = useState(0);
   const [name, setName] = useState("");
@@ -232,3 +233,32 @@ const Employees = () => {
 };
 
 export default Employees;
+
+
+export async function getServerSideProps({req, res}) {
+  let role = await authService.getRole(req, res)
+
+  if (role === undefined) {
+    return {
+      redirect: {
+         permanent: true,
+         destination: '/'
+      }
+   }
+  }
+
+  let employee = await employeeService.get(req, res);
+  if (employee.isRedirect) {
+    return {
+       redirect: {
+          permanent: true,
+          destination: '/'
+       }
+    }
+  }
+  else {
+    return {
+      props: {employee:employee.employees}, 
+    }
+  }
+}

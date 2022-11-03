@@ -2,18 +2,18 @@ import authService from "./authService";
 
 class CustomerService {
 
-    async get(page) {
+    async get(page, req, res) {
         let requestOptions = {
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + authService.getCookie('Token')
+                'Authorization': 'Bearer ' + authService.getCookieFromServer('Token', req, res)
             },
         };
 
         return await fetch(`http://127.0.0.1:8000/api/v1/customer/` + page, requestOptions).then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();
@@ -31,7 +31,7 @@ class CustomerService {
         };
         return await fetch(`http://127.0.0.1:8000/api/v1/customer/` + id, requestOptions).then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();
@@ -50,7 +50,7 @@ class CustomerService {
         };
         return await fetch(`http://127.0.0.1:8000/api/v1/customer/`, requestOptions).then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();
@@ -71,7 +71,7 @@ class CustomerService {
         return await fetch(`http://127.0.0.1:8000/api/v1/customer/` + id, requestOptions)
             .then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();

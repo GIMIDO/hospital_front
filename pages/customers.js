@@ -1,10 +1,11 @@
 import customerService from "../services/customerService";
 import React, { useState, useEffect } from "react";
+import authService from "../services/authService";
 
 
-const Customers = () => {
+const Customers = ({customer}) => {
   
-  const [customerList, setCustomers] = useState([]);
+  const [customerList, setCustomers] = useState(customer);
   const [id, setId] = useState(0);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -177,3 +178,33 @@ const Customers = () => {
 };
 
 export default Customers;
+
+
+export async function getServerSideProps({req, res}) {
+  let role = await authService.getRole(req, res)
+
+  if (role === undefined) {
+    return {
+      redirect: {
+         permanent: true,
+         destination: '/'
+      }
+   }
+  }
+
+  let customer = await customerService.get(1, req, res);
+  console.log(customer)
+  if (customer.isRedirect) {
+    return {
+       redirect: {
+          permanent: true,
+          destination: '/'
+       }
+    }
+  }
+  else {
+    return {
+      props: {customer:customer.customers}, 
+    }
+  }
+}

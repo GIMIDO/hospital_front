@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
+import authService from "../services/authService";
 import departmentService from "../services/departmentService";
 
 
-const Departments = () => {
-
-  const [departmentList, setDepartments] = useState([]);
+const Departments = ({department}) => {
+  
+  const [departmentList, setDepartments] = useState(department);
   const [id, setId] = useState(0);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
@@ -134,3 +135,32 @@ const Departments = () => {
 };
 
 export default Departments;
+
+
+export async function getServerSideProps({req, res}) {
+  let role = await authService.getRole(req, res)
+
+  if (role === undefined) {
+    return {
+      redirect: {
+         permanent: true,
+         destination: '/'
+      }
+   }
+  }
+
+  let department = await departmentService.get(req, res);
+  if (department.isRedirect) {
+    return {
+       redirect: {
+          permanent: true,
+          destination: '/'
+       }
+    }
+  }
+  else {
+    return {
+      props: {department:department.departments}, 
+    }
+  }
+}

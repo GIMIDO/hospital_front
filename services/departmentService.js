@@ -1,39 +1,38 @@
-import AuthService from "./authService";
+import authService from "./authService";
+
 
 class DepartmentService {
-    async put(id, data) {
+    async get(req, res) {
         let requestOptions = {
-            method: 'PUT',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + AuthService.getCookie('Token')
+                'Authorization': 'Bearer ' + authService.getCookieFromServer('Token', req, res)
             },
-            body: JSON.stringify(data),
         };
 
-        return await fetch(`http://127.0.0.1:8000/api/v1/department/` + id, requestOptions)
-            .then(response => {
+        return await fetch(`http://127.0.0.1:8000/api/v1/department/`, requestOptions).then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();
             }
         });
     }
-
-    async get() {
-        let requestOptions = {
-            method: 'GET',
+    
+    async delete(id) {
+        const requestOptions = {
+            method: 'DELETE',
             headers: {
-                'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + AuthService.getCookie('Token')
+                'Content-Type': 'application/json;charset=UTF-8',
+                'Authorization': 'Bearer ' + authService.getCookie('Token')
+    
             },
         };
-
-        return await fetch(`http://127.0.0.1:8000/api/v1/department/`, requestOptions).then(response => {
+        return await fetch(`http://127.0.0.1:8000/api/v1/department/` + id, requestOptions).then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();
@@ -46,14 +45,14 @@ class DepartmentService {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json;charset=UTF-8',
-                'Authorization': 'Bearer ' + AuthService.getCookie('Token')
+                'Authorization': 'Bearer ' + authService.getCookie('Token')
 
             },
             body: JSON.stringify(data),
         };
         return await fetch(`http://127.0.0.1:8000/api/v1/department/`, requestOptions).then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();
@@ -61,24 +60,27 @@ class DepartmentService {
         });
     }
 
-    async delete(id) {
-        const requestOptions = {
-            method: 'DELETE',
+    async put(id, data) {
+        let requestOptions = {
+            method: 'PUT',
             headers: {
-                'Content-Type': 'application/json;charset=UTF-8',
-                'Authorization': 'Bearer ' + AuthService.getCookie('Token')
-
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + authService.getCookie('Token')
             },
+            body: JSON.stringify(data),
         };
-        return await fetch(`http://127.0.0.1:8000/api/v1/department/` + id, requestOptions).then(response => {
+
+        return await fetch(`http://127.0.0.1:8000/api/v1/department/` + id, requestOptions)
+            .then(response => {
             if (response.status == 403) {
-                window.location.assign("http://localhost:3000/");
+                return {isRedirect: true}
             }
             else {
                 return response.json();
             }
         });
     }
+
 }
 
 export default new DepartmentService();

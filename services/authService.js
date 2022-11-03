@@ -1,7 +1,12 @@
-import Cookies from 'universal-cookie';
+import { getCookie, setCookie } from "cookies-next"
 
 class AuthService {
-    async getRole() {
+    getCookieFromServer(name, req, res) {
+        var cookie = getCookie(name, {req, res})
+        return cookie
+    }
+
+    async getRole(req, res) {
         let requestOptions = {
             method: 'GET',
             headers: {
@@ -9,7 +14,7 @@ class AuthService {
             }
         };
 
-        return await fetch(`http://127.0.0.1:8000/api/v1/login/` + this.getCookie('Token'), requestOptions)
+        return await fetch(`http://127.0.0.1:8000/api/v1/login/` + this.getCookieFromServer('Token', req, res), requestOptions)
             .then(response => {
                 if (response.status == 403) {
                     return undefined;
@@ -41,14 +46,12 @@ class AuthService {
     }
 
     getCookie(name) {
-        const cookies = new Cookies();
-        var cookie = cookies.get(name);
-        return cookie;
+        var cookie = getCookie(name)
+        return cookie
     }
 
     setCookie(name, value){
-        const cookies = new Cookies();
-        cookies.set(name, value);
+        setCookie(name, value)
     }
 }
 
