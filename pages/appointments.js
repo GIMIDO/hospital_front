@@ -5,12 +5,14 @@ import authService from "../services/authService";
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
+import Layout from "../components/Layout";
 
-const Appointments = ({appointment, customerIdsM, employeeIdsM}) => {
+
+const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, username, role}) => {
 
   const [appointmentList, setAppointments] = useState(appointment);
-  const [employeeIds, setEmployeeIds] = useState(employeeIdsM);
-  const [customerIds, setCustomerIds] = useState(customerIdsM);
+  const [employeeIds, setEmployeeIds] = useState(employeeIds_);
+  const [customerIds, setCustomerIds] = useState(customerIds_);
   const [id, setId] = useState(0);
   const [date, setDate] = useState(new Date());
   const [start, setstart] = useState(new Date().toLocaleTimeString());
@@ -19,7 +21,7 @@ const Appointments = ({appointment, customerIdsM, employeeIdsM}) => {
   const [customer, setCustomer] = useState(0);
 
   const [page, setPage] = useState(1);
-  const [isNotLastPage, setIsNotLastPage] = useState(true);
+  const [isNotLastPage, setIsNotLastPage] = useState(isNotLastPage_);
 
   const client = new W3CWebSocket("ws://localhost:3001/ws");
   const [wsUpdate, setWsUpdate] = useState(0);
@@ -135,134 +137,136 @@ const Appointments = ({appointment, customerIdsM, employeeIdsM}) => {
   };
 
   return (
-    <div>
-      <form
-        id="appointmentForm"
-        onSubmit={SaveData}
-      >
-                <div>
-                  <label htmlFor="date">Date:</label>
-                  <input
-                    type={"date"}
-                    name="date"
-                    value={date}
-                    onChange={(e) => {
-                      setDate(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="start">Start of appointment:</label>
-                  <input
-                    type={"time"}
-                    name="start"
-                    value={start}
-                    onChange={(e) => {
-                      setstart(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="end">End of appointment:</label>
-                  <input
-                    type={"time"}
-                    name="end"
-                    value={end}
-                    onChange={(e) => {
-                      setend(e.target.value);
-                    }}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="customer">Customer id:</label>
-                  <select
-                    name="customer"
-                    onChange={(e) => {
-                      setCustomer(e.target.value);
-                    }}
-                    value={customer}
-                  >
-                    {customerIds.map((element) => (
-                      <option key={element} value={element}>
-                        {element}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <label htmlFor="employeeSet">Employee Id:</label>
-                  <select
-                    name="employeeSet"
-                    onChange={(e) => {
-                      setEmployee(e.target.value);
-                    }}
-                    value={employee}
-                  >
-                    {employeeIds.map((element) => (
-                      <option key={element} value={element}>
-                        {element}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-        <div>
-          <button id="submit" type={"submit"}>
-            Save
+    <Layout username={username}>
+      <div>
+        <form
+          id="appointmentForm"
+          onSubmit={SaveData}
+        >
+                  <div>
+                    <label htmlFor="date">Date:</label>
+                    <input
+                      type={"date"}
+                      name="date"
+                      value={date}
+                      onChange={(e) => {
+                        setDate(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="start">Start of appointment:</label>
+                    <input
+                      type={"time"}
+                      name="start"
+                      value={start}
+                      onChange={(e) => {
+                        setstart(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="end">End of appointment:</label>
+                    <input
+                      type={"time"}
+                      name="end"
+                      value={end}
+                      onChange={(e) => {
+                        setend(e.target.value);
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="customer">Customer id:</label>
+                    <select
+                      name="customer"
+                      onChange={(e) => {
+                        setCustomer(e.target.value);
+                      }}
+                      value={customer}
+                    >
+                      {customerIds.map((element) => (
+                        <option key={element} value={element}>
+                          {element}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label htmlFor="employeeSet">Employee Id:</label>
+                    <select
+                      name="employeeSet"
+                      onChange={(e) => {
+                        setEmployee(e.target.value);
+                      }}
+                      value={employee}
+                    >
+                      {employeeIds.map((element) => (
+                        <option key={element} value={element}>
+                          {element}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+          <div>
+            <button id="submit" type={"submit"}>
+              Save
+            </button>
+            <button id="reset" onClick={reset}>
+              Reset
+            </button>
+          </div>
+        </form>
+
+
+        <h2>Appointments:</h2>
+        <p>
+          {appointmentList.map((appointment) => (
+            <li key={appointment.id}>
+              <p>{appointment.date}</p>
+              <p>{appointment.start}</p>
+              <p>{appointment.end}</p>
+              <p>{appointment.employee}</p>
+              <p>{appointment.customer}</p>
+            
+        <button
+                onClick={(_) => {
+                  ChangeAppointment(appointment);
+                }}
+              >
+                Change appointment
+              </button>
+
+              <button
+                onClick={(_) => {
+                  DeleteAppointment(appointment.id);
+                }}
+              >
+                Delete appointment
+              </button>
+              </li>
+          ))}
+              </p>
+              <div>
+          <button
+            onClick={(_) => {
+              setPage(page + 1);
+            }}
+            style={{ display: isNotLastPage ? "initial" : "none" }}
+          >
+            Next
           </button>
-          <button id="reset" onClick={reset}>
-            Reset
+          <button
+            onClick={(_) => {
+              setPage(page - 1);
+            }}
+            style={{ display: page > 1 ? "initial" : "none" }}
+          >
+            Previous
           </button>
         </div>
-      </form>
-
-
-      <h2>Appointments:</h2>
-      <p>
-        {appointmentList.map((appointment) => (
-          <li key={appointment.id}>
-            <p>{appointment.date}</p>
-            <p>{appointment.start}</p>
-            <p>{appointment.end}</p>
-            <p>{appointment.employee}</p>
-            <p>{appointment.customer}</p>
-          
-      <button
-              onClick={(_) => {
-                ChangeAppointment(appointment);
-              }}
-            >
-              Change appointment
-            </button>
-
-            <button
-              onClick={(_) => {
-                DeleteAppointment(appointment.id);
-              }}
-            >
-              Delete appointment
-            </button>
-            </li>
-        ))}
-            </p>
-            <div>
-        <button
-          onClick={(_) => {
-            setPage(page + 1);
-          }}
-          style={{ display: isNotLastPage ? "initial" : "none" }}
-        >
-          Next
-        </button>
-        <button
-          onClick={(_) => {
-            setPage(page - 1);
-          }}
-          style={{ display: page > 1 ? "initial" : "none" }}
-        >
-          Previous
-        </button>
       </div>
-    </div>
+    </Layout>
   );
 };
 
@@ -293,10 +297,14 @@ export async function getServerSideProps({req, res}) {
   else {
     return {
       props: {
+        username: role.name,
+        role: role.role,
+
         appointment: appointment.appointments,
-        customerIdsM: appointment.customerIds,
-        employeeIdsM: appointment.employeeIds,
-        isNotLastPage: appointment.isNotLastPage
+        customerIds_: appointment.customerIds,
+        employeeIds_: appointment.employeeIds,
+
+        isNotLastPage_: appointment.isNotLastPage
       }, 
     }
   }

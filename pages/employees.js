@@ -5,8 +5,10 @@ import authService from "../services/authService";
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
+import Layout from "../components/Layout";
 
-const Employees = ({employee}) => {
+
+const Employees = ({employee, username, role}) => {
 
   const [employeeList, setEmployees] = useState(employee);
   const [ids, setIds] = useState([]);
@@ -139,135 +141,137 @@ const Employees = ({employee}) => {
 
 
   return (
-    <div>
-      <form id="employeeForm" onSubmit={SaveData}>
-        <div>
-          <label htmlFor="name">Name:</label>
-          <input
-            type={"text"}
-            name="name"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type={"email"}
-            name="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="phone">Phone:</label>
-          <input
-            type={"text"}
-            name="phone"
-            value={phone}
-            onChange={(e) => {
-              setPhone(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="address">Address:</label>
-          <input
-            type={"text"}
-            name="address"
-            value={address}
-            onChange={(e) => {
-              setAddress(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            type={"password"}
-            name="password"
-            value={password}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="roleSet">Role:</label>
-          <select
-            name="roleSet"
-            onChange={(e) => {
-              setEmployeeRole(e.target.value);
-            }}
-            value={employeeRole}
-          >
-            <option>Admin</option>
-            <option>Doctor</option>
-            <option>Reception</option>
-          </select>
-        </div>
-        <div>
-          <label htmlFor="departmentSet">Department Id:</label>
-          <select
-            name="departmentSet"
-            onChange={(e) => {
-              setDepartment(e.target.value);
-            }}
-            value={department}
-          >
-            {ids.map((element) => (
-              <option key={element} value={element}>
-                {element}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <button id="submit" type={"submit"}>
-            Save
-          </button>
-          <button id="reset" onClick={reset}>
-            Reset
-          </button>
-        </div>
-      </form>
-
-      <h2>Employees:</h2>
-      <p>
-        {employeeList.map((employee) => (
-          <li key={employee.id}>
-            <p>{employee.id}</p>
-            <p>{employee.name}</p>
-            <p>{employee.email}</p>
-            <p>{employee.phone}</p>
-            <p>{employee.address}</p>
-            <p>{employee.role}</p>
-            <p>{employee.password}</p>
-            <p>{employee.department}</p>
-
-            <button
-              onClick={(_) => {
-                ChangeEmployee(employee);
+    <Layout username={username}>
+      <div>
+        <form id="employeeForm" onSubmit={SaveData}>
+          <div>
+            <label htmlFor="name">Name:</label>
+            <input
+              type={"text"}
+              name="name"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
               }}
-            >
-              Change customer
-            </button>
-
-            <button
-              onClick={(_) => {
-                DeleteEmployee(employee.id);
+            />
+          </div>
+          <div>
+            <label htmlFor="email">Email:</label>
+            <input
+              type={"email"}
+              name="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
               }}
+            />
+          </div>
+          <div>
+            <label htmlFor="phone">Phone:</label>
+            <input
+              type={"text"}
+              name="phone"
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="address">Address:</label>
+            <input
+              type={"text"}
+              name="address"
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="password">Password:</label>
+            <input
+              type={"password"}
+              name="password"
+              value={password}
+              onChange={(e) => {
+                setPassword(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="roleSet">Role:</label>
+            <select
+              name="roleSet"
+              onChange={(e) => {
+                setEmployeeRole(e.target.value);
+              }}
+              value={employeeRole}
             >
-              Delete customer
+              <option>Admin</option>
+              <option>Doctor</option>
+              <option>Reception</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="departmentSet">Department Id:</label>
+            <select
+              name="departmentSet"
+              onChange={(e) => {
+                setDepartment(e.target.value);
+              }}
+              value={department}
+            >
+              {ids.map((element) => (
+                <option key={element} value={element}>
+                  {element}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <button id="submit" type={"submit"}>
+              Save
             </button>
-          </li>
-        ))}
-      </p>
-    </div>
+            <button id="reset" onClick={reset}>
+              Reset
+            </button>
+          </div>
+        </form>
+
+        <h2>Employees:</h2>
+        <p>
+          {employeeList.map((employee) => (
+            <li key={employee.id}>
+              <p>{employee.id}</p>
+              <p>{employee.name}</p>
+              <p>{employee.email}</p>
+              <p>{employee.phone}</p>
+              <p>{employee.address}</p>
+              <p>{employee.role}</p>
+              <p>{employee.password}</p>
+              <p>{employee.department}</p>
+
+              <button
+                onClick={(_) => {
+                  ChangeEmployee(employee);
+                }}
+              >
+                Change customer
+              </button>
+
+              <button
+                onClick={(_) => {
+                  DeleteEmployee(employee.id);
+                }}
+              >
+                Delete customer
+              </button>
+            </li>
+          ))}
+        </p>
+      </div>
+    </Layout>
   );
 };
 
@@ -297,7 +301,12 @@ export async function getServerSideProps({req, res}) {
   }
   else {
     return {
-      props: {employee:employee.employees}, 
+      props: {
+        username: role.name,
+        role: role.role,
+
+        employee:employee.employees
+      }, 
     }
   }
 }

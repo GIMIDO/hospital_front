@@ -5,8 +5,10 @@ import departmentService from "../services/departmentService";
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
+import Layout from "../components/Layout";
 
-const Departments = ({department}) => {
+
+const Departments = ({department, username, role}) => {
   
   const [departmentList, setDepartments] = useState(department);
   const [id, setId] = useState(0);
@@ -111,67 +113,69 @@ const Departments = ({department}) => {
 
 
   return (
-    <div>
-      <form id="departmentForm" onSubmit={SaveData}>
-        <div>
-          <label htmlFor="name">Name:</label>
-          <input
-            type={"text"}
-            name="name"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="address">Address:</label>
-          <input
-            type={"text"}
-            name="address"
-            value={address}
-            onChange={(e) => {
-              setAddress(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <button id="submit" type={"submit"}>
-            Save
-          </button>
-          <button id="reset" onClick={reset}>
-            Reset
-          </button>
-        </div>
-      </form>
-
-      <h2>Departments:</h2>
-      <p>
-        {departmentList.map((department) => (
-          <li key={department.id}>
-            <p>{department.id}</p>
-            <p>{department.name}</p>
-            <p>{department.address}</p>
-
-            <button
-              onClick={(_) => {
-                ChangeDepartment(department);
+    <Layout username={username}>
+      <div>
+        <form id="departmentForm" onSubmit={SaveData}>
+          <div>
+            <label htmlFor="name">Name:</label>
+            <input
+              type={"text"}
+              name="name"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
               }}
-            >
-              Change department
-            </button>
-
-            <button
-              onClick={(_) => {
-                DeleteDepartment(department.id);
+            />
+          </div>
+          <div>
+            <label htmlFor="address">Address:</label>
+            <input
+              type={"text"}
+              name="address"
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value);
               }}
-            >
-              Delete department
+            />
+          </div>
+          <div>
+            <button id="submit" type={"submit"}>
+              Save
             </button>
-          </li>
-        ))}
-      </p>
-    </div>
+            <button id="reset" onClick={reset}>
+              Reset
+            </button>
+          </div>
+        </form>
+
+        <h2>Departments:</h2>
+        <p>
+          {departmentList.map((department) => (
+            <li key={department.id}>
+              <p>{department.id}</p>
+              <p>{department.name}</p>
+              <p>{department.address}</p>
+
+              <button
+                onClick={(_) => {
+                  ChangeDepartment(department);
+                }}
+              >
+                Change department
+              </button>
+
+              <button
+                onClick={(_) => {
+                  DeleteDepartment(department.id);
+                }}
+              >
+                Delete department
+              </button>
+            </li>
+          ))}
+        </p>
+      </div>
+    </Layout>
   );
 };
 
@@ -201,7 +205,12 @@ export async function getServerSideProps({req, res}) {
   }
   else {
     return {
-      props: {department:department.departments}, 
+      props: {
+        username: role.name,
+        role: role.role,
+
+        department:department.departments
+      }, 
     }
   }
 }

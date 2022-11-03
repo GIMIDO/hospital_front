@@ -1,9 +1,12 @@
 import Link from "next/link";
 
-const NavMenu = () => {
+const NavMenu = ({username}) => {
   return (
     <header>
       <nav>
+        <div>
+          <Link href='/'>{username}</Link>
+        </div>
         <div>
           <Link href='/appointments'>Appointments</Link>
           <Link href='/customers'>Customers</Link>

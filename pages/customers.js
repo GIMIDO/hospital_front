@@ -5,9 +5,10 @@ import authService from "../services/authService";
 
 import { w3cwebsocket as W3CWebSocket } from "websocket";
 
+import Layout from "../components/Layout";
 
-const Customers = ({ customer }) => {
 
+const Customers = ({ customer, isNotLastPage_, username, role }) => {
   const [customerList, setCustomers] = useState(customer);
   const [id, setId] = useState(0);
   const [name, setName] = useState("");
@@ -16,7 +17,7 @@ const Customers = ({ customer }) => {
   const [address, setAddress] = useState("");
 
   const [page, setPage] = useState(1);
-  const [isNotLastPage, setIsNotLastPage] = useState(true);
+  const [isNotLastPage, setIsNotLastPage] = useState(isNotLastPage_);
 
   const client = new W3CWebSocket("ws://localhost:3001/ws");
   const [wsUpdate, setWsUpdate] = useState(0);
@@ -57,20 +58,19 @@ const Customers = ({ customer }) => {
     setCustomers(data.customers);
   }
 
+
   const DeleteCustomer = async (id) => {
     let result = await customerService.delete(id);
     if (result.success != undefined) {
-      client.send(
-        JSON.stringify({ message: "UpdateCustomer" })
-      );
+      client.send(JSON.stringify({ message: "UpdateCustomer" }));
     }
   };
+
 
   const SaveData = async (e) => {
     e.preventDefault();
 
     if (id == 0) {
-
       let customer = {
         name: name,
         email: email,
@@ -80,7 +80,6 @@ const Customers = ({ customer }) => {
       let data = { customer: customer };
 
       await customerService.post(data);
-
     } else {
       let customer = {
         id: id,
@@ -121,115 +120,118 @@ const Customers = ({ customer }) => {
 
 
   return (
-    <div>
-      <form onSubmit={SaveData}>
-        <div>
-          <label htmlFor="name">Name:</label>
-          <input
-            type={"text"}
-            name="name"
-            value={name}
-            onChange={(e) => {
-              setName(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="email">Email:</label>
-          <input
-            type={"email"}
-            name="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="phone">Phone:</label>
-          <input
-            type={"text"}
-            name="phone"
-            value={phone}
-            onChange={(e) => {
-              setPhone(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <label htmlFor="address">Address:</label>
-          <input
-            type={"text"}
-            name="address"
-            value={address}
-            onChange={(e) => {
-              setAddress(e.target.value);
-            }}
-          />
-        </div>
-        <div>
-          <button id="submit" type={"submit"}>
-            Save
-          </button>
-          <button id="reset" onClick={reset}>
-            Reset
-          </button>
-        </div>
-      </form>
-
-      <h2>Customers:</h2>
-      <p>
-        {customerList.map((user) => (
-          <li key={user.id}>
-            <p>{user.id}</p>
-            <p>{user.name}</p>
-            <p>{user.email}</p>
-            <p>{user.phone}</p>
-            <p>{user.address}</p>
-
-            <button
-              onClick={(_) => {
-                ChangeCustomer(user);
-              }}
-            >
-              Change customer
-            </button>
-
-            <button
-              onClick={(_) => {
-                DeleteCustomer(user.id);
-              }}
-            >
-              Delete customer
-            </button>
-          </li>
-        ))}
-      </p>
-
+    <Layout username={username}>
       <div>
-        <button
-          onClick={(_) => {
-            setPage(page + 1);
-          }}
-          style={{ display: isNotLastPage ? "initial" : "none" }}
-        >
-          Next
-        </button>
-        <button
-          onClick={(_) => {
-            setPage(page - 1);
-          }}
-          style={{ display: page > 1 ? "initial" : "none" }}
-        >
-          Previous
-        </button>
-      </div>
+        <form onSubmit={SaveData}>
+          <div>
+            <label htmlFor="name">Name:</label>
+            <input
+              type={"text"}
+              name="name"
+              value={name}
+              onChange={(e) => {
+                setName(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="email">Email:</label>
+            <input
+              type={"email"}
+              name="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="phone">Phone:</label>
+            <input
+              type={"text"}
+              name="phone"
+              value={phone}
+              onChange={(e) => {
+                setPhone(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <label htmlFor="address">Address:</label>
+            <input
+              type={"text"}
+              name="address"
+              value={address}
+              onChange={(e) => {
+                setAddress(e.target.value);
+              }}
+            />
+          </div>
+          <div>
+            <button id="submit" type={"submit"}>
+              Save
+            </button>
+            <button id="reset" onClick={reset}>
+              Reset
+            </button>
+          </div>
+        </form>
 
-    </div>
+        <h2>Customers:</h2>
+        <p>
+          {customerList.map((user) => (
+            <li key={user.id}>
+              <p>{user.id}</p>
+              <p>{user.name}</p>
+              <p>{user.email}</p>
+              <p>{user.phone}</p>
+              <p>{user.address}</p>
+
+              <button
+                onClick={(_) => {
+                  ChangeCustomer(user);
+                }}
+              >
+                Change customer
+              </button>
+
+              <button
+                onClick={(_) => {
+                  DeleteCustomer(user.id);
+                }}
+              >
+                Delete customer
+              </button>
+            </li>
+          ))}
+        </p>
+
+        <div>
+          <button
+            onClick={(_) => {
+              setPage(page + 1);
+            }}
+            style={{ display: isNotLastPage ? "initial" : "none" }}
+          >
+            Next
+          </button>
+          <button
+            onClick={(_) => {
+              setPage(page - 1);
+            }}
+            style={{ display: page > 1 ? "initial" : "none" }}
+          >
+            Previous
+          </button>
+        </div>
+      </div>
+    </Layout>
   );
 };
 
+
 export default Customers;
+
 
 export async function getServerSideProps({ req, res }) {
   let role = await authService.getRole(req, res);
@@ -254,8 +256,12 @@ export async function getServerSideProps({ req, res }) {
   } else {
     return {
       props: {
+        username: role.name,
+        role: role.role,
+
         customer: customer.customers,
-        isNotLastPage: customer.isNotLastPage
+        
+        isNotLastPage_: customer.isNotLastPage,
       },
     };
   }
