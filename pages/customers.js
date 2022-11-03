@@ -1,32 +1,70 @@
-import customerService from "../services/customerService";
 import React, { useState, useEffect } from "react";
+
+import customerService from "../services/customerService";
 import authService from "../services/authService";
 
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const Customers = ({customer}) => {
-  
+
+const Customers = ({ customer }) => {
+
   const [customerList, setCustomers] = useState(customer);
   const [id, setId] = useState(0);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [address, setAddress] = useState("");
+
   const [page, setPage] = useState(1);
+  const [isNotLastPage, setIsNotLastPage] = useState(true);
+
+  const client = new W3CWebSocket("ws://localhost:3001/ws");
+  const [wsUpdate, setWsUpdate] = useState(0);
 
 
-  async function getListOfCustomers(page) {
-    let data = await customerService.get(page);
-    setCustomers(data.customers);
+  useEffect(() => {
+    async function getCustomers() {
+      await getListOfCustomers();
+    }
+    getCustomers();
+
+    setClient();
+  }, []);
+
+  useEffect(() => {
+    async function getCustomers() {
+      await getListOfCustomers();
+    }
+    getCustomers();
+  }, [page, wsUpdate]);
+
+  const setClient = () => {
+    client.onopen = () => {
+      console.log("Open");
+    };
+
+    client.onmessage = (message) => {
+      if (message.data.toString() == "UpdateCustomer") {
+        setPage(1);
+        setWsUpdate(Date.now());
+      }
+    };
   };
 
+
+  async function getListOfCustomers() {
+    let data = await customerService.get(page);
+    setCustomers(data.customers);
+  }
 
   const DeleteCustomer = async (id) => {
     let result = await customerService.delete(id);
     if (result.success != undefined) {
-      getListOfCustomers(page)
+      client.send(
+        JSON.stringify({ message: "UpdateCustomer" })
+      );
     }
   };
-
 
   const SaveData = async (e) => {
     e.preventDefault();
@@ -40,12 +78,10 @@ const Customers = ({customer}) => {
         address: address,
       };
       let data = { customer: customer };
-      
+
       await customerService.post(data);
-      getListOfCustomers(page)
 
     } else {
-
       let customer = {
         id: id,
         name: name,
@@ -56,8 +92,13 @@ const Customers = ({customer}) => {
       let data = { customer: customer };
 
       await customerService.put(id, data);
-      getListOfCustomers(page)
     }
+
+    client.send(
+      JSON.stringify({
+        message: "UpdateCustomer",
+      })
+    );
   };
 
 
@@ -137,15 +178,6 @@ const Customers = ({customer}) => {
       </form>
 
       <h2>Customers:</h2>
-      <label htmlFor="email">set page</label>
-          <input
-            type={"numver"}
-            name="page"
-            value={page}
-            onChange={(e) => {
-              setPage(e.target.value);
-            }}
-          />
       <p>
         {customerList.map((user) => (
           <li key={user.id}>
@@ -173,38 +205,58 @@ const Customers = ({customer}) => {
           </li>
         ))}
       </p>
+
+      <div>
+        <button
+          onClick={(_) => {
+            setPage(page + 1);
+          }}
+          style={{ display: isNotLastPage ? "initial" : "none" }}
+        >
+          Next
+        </button>
+        <button
+          onClick={(_) => {
+            setPage(page - 1);
+          }}
+          style={{ display: page > 1 ? "initial" : "none" }}
+        >
+          Previous
+        </button>
+      </div>
+
     </div>
   );
 };
 
 export default Customers;
 
-
-export async function getServerSideProps({req, res}) {
-  let role = await authService.getRole(req, res)
+export async function getServerSideProps({ req, res }) {
+  let role = await authService.getRole(req, res);
 
   if (role === undefined) {
     return {
       redirect: {
-         permanent: true,
-         destination: '/'
-      }
-   }
+        permanent: true,
+        destination: "/",
+      },
+    };
   }
 
   let customer = await customerService.get(1, req, res);
-  console.log(customer)
   if (customer.isRedirect) {
     return {
-       redirect: {
-          permanent: true,
-          destination: '/'
-       }
-    }
-  }
-  else {
+      redirect: {
+        permanent: true,
+        destination: "/",
+      },
+    };
+  } else {
     return {
-      props: {customer:customer.customers}, 
-    }
+      props: {
+        customer: customer.customers,
+        isNotLastPage: customer.isNotLastPage
+      },
+    };
   }
 }

@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
+
 import authService from "../services/authService";
 import departmentService from "../services/departmentService";
+
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 
 const Departments = ({department}) => {
@@ -9,6 +12,38 @@ const Departments = ({department}) => {
   const [id, setId] = useState(0);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+
+  const client = new W3CWebSocket("ws://localhost:3001/ws");
+  const [wsUpdate, setWsUpdate] = useState(0);
+
+
+  useEffect(() => {
+    async function getDepartments() {
+      await getListOfDepartments();
+    }
+    getDepartments();
+
+    setClient();
+  }, []);
+
+  useEffect(() => {
+    async function getDepartments() {
+      await getListOfDepartments();
+    }
+    getDepartments();
+  }, [wsUpdate]);
+
+  const setClient = () => {
+    client.onopen = () => {
+      console.log("Open");
+    };
+
+    client.onmessage = (message) => {
+      if (message.data.toString() == "UpdateDepartment") {
+        setWsUpdate(Date.now());
+      }
+    };
+  };
 
 
   async function getListOfDepartments() {
@@ -20,7 +55,11 @@ const Departments = ({department}) => {
   const DeleteDepartment = async (id) => {
     let result = await departmentService.delete(id);
     if (result.success != undefined) {
-      getListOfDepartments()
+      client.send(
+        JSON.stringify({
+          message: "UpdateDepartment",
+        })
+      );
     }
   };
 
@@ -37,7 +76,6 @@ const Departments = ({department}) => {
       let data = { department: department, };
 
       await departmentService.post(data);
-      getListOfDepartments();
 
     } else {
 
@@ -50,8 +88,11 @@ const Departments = ({department}) => {
       let data = { department: department };
 
       await departmentService.put(id, data);
-      getListOfDepartments();
     }
+
+    client.send(
+      JSON.stringify({ message: "UpdateDepartment" })
+    );
   };
 
 

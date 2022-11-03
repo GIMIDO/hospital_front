@@ -1,6 +1,9 @@
-import employeeService from "../services/employeeService";
 import React, { useState, useEffect } from "react";
+
+import employeeService from "../services/employeeService";
 import authService from "../services/authService";
+
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 
 const Employees = ({employee}) => {
@@ -16,7 +19,39 @@ const Employees = ({employee}) => {
   const [password, setPassword] = useState("");
   const [department, setDepartment] = useState(0);
 
+  const client = new W3CWebSocket("ws://localhost:3001/ws");
+  const [wsUpdate, setWsUpdate] = useState(0);
 
+
+  useEffect(() => {
+    async function getEmployees() {
+      await getListOfEmployees();
+    }
+    getEmployees();
+
+    setClient();
+  }, []);
+
+  useEffect(() => {
+    async function getEmployees() {
+      await getListOfEmployees();
+    }
+    getEmployees();
+  }, [wsUpdate]);
+
+  const setClient = () => {
+    client.onopen = () => {
+      console.log("Open");
+    };
+
+    client.onmessage = (message) => {
+      if (message.data.toString() == "UpdateEmployee") {
+        setWsUpdate(Date.now());
+      }
+    };
+  };
+
+  
   async function getListOfEmployees() {
     let data = await employeeService.get();
     console.log(data)
@@ -27,9 +62,11 @@ const Employees = ({employee}) => {
 
 
   const DeleteEmployee = async (id) => {
-    await employeeService.delete(id);
+    let result = await employeeService.delete(id);
     if (result.success != undefined) {
-      getListOfEmployees();
+      client.send(
+        JSON.stringify({ message: "UpdateEmployee" })
+      );
     }
   };
 
@@ -52,7 +89,6 @@ const Employees = ({employee}) => {
       let data = { employee: employee };
 
       await employeeService.post(data);
-      getListOfEmployees();
 
     } else {
 
@@ -70,8 +106,11 @@ const Employees = ({employee}) => {
       let data = { employee: employee };
 
       await employeeService.put(id, data);
-      getListOfEmployees()
     }
+
+    client.send(
+      JSON.stringify({ message: "UpdateEmployee" })
+    );
   };
 
 

@@ -1,23 +1,61 @@
-import appointmentService from "../services/appointmentService";
 import React, { useState, useEffect } from "react";
+
+import appointmentService from "../services/appointmentService";
 import authService from "../services/authService";
 
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
-const Appointments = ({appointment}) => {
+
+const Appointments = ({appointment, customerIdsM, employeeIdsM}) => {
+
   const [appointmentList, setAppointments] = useState(appointment);
-  const [employeeIds, setEmployeeIds] = useState([]);
-  const [customerIds, setCustomerIds] = useState([]);
+  const [employeeIds, setEmployeeIds] = useState(employeeIdsM);
+  const [customerIds, setCustomerIds] = useState(customerIdsM);
   const [id, setId] = useState(0);
   const [date, setDate] = useState(new Date());
   const [start, setstart] = useState(new Date().toLocaleTimeString());
   const [end, setend] = useState(new Date().toLocaleTimeString());
   const [employee, setEmployee] = useState(0);
   const [customer, setCustomer] = useState(0);
-  const [role, setRole] = useState("");
+
   const [page, setPage] = useState(1);
+  const [isNotLastPage, setIsNotLastPage] = useState(true);
+
+  const client = new W3CWebSocket("ws://localhost:3001/ws");
+  const [wsUpdate, setWsUpdate] = useState(0);
 
 
-  async function getListOfAppointments(page) {
+  useEffect(() => {
+    async function getAppointments() {
+      await getListOfAppointments();
+    }
+    getAppointments();
+
+    setClient();
+  }, []);
+
+  useEffect(() => {
+    async function getAppointments() {
+      await getListOfAppointments();
+    }
+    getAppointments();
+  }, [page, wsUpdate]);
+
+  const setClient = () => {
+    client.onopen = () => {
+      console.log("Open");
+    };
+
+    client.onmessage = (message) => {
+      if (message.data.toString() == "UpdateAppointment") {
+        setPage(1);
+        setWsUpdate(Date.now());
+      }
+    };
+  };
+
+
+  async function getListOfAppointments() {
     let data = await appointmentService.get(page);
 
     setAppointments(data.appointments);
@@ -31,7 +69,9 @@ const Appointments = ({appointment}) => {
   const DeleteAppointment = async (id) => {
     let result = await appointmentService.delete(id);
     if (result.success != undefined) {
-      getListOfAppointments(page)
+      client.send(
+        JSON.stringify({ message: "UpdateAppointment" })
+      );
     }
   };
 
@@ -52,7 +92,6 @@ const Appointments = ({appointment}) => {
       let data = { appointment: appointment };
 
       await appointmentService.post(data);
-      getListOfAppointments(page)
 
     } else {
       
@@ -68,8 +107,11 @@ const Appointments = ({appointment}) => {
       let data = { appointment: appointment };
 
       await appointmentService.put(id, data);
-      getListOfAppointments(page)
     }
+
+    client.send(
+      JSON.stringify({ message: "UpdateAppointment" })
+    );
   };
 
 
@@ -98,7 +140,6 @@ const Appointments = ({appointment}) => {
         id="appointmentForm"
         onSubmit={SaveData}
       >
-
                 <div>
                   <label htmlFor="date">Date:</label>
                   <input
@@ -184,9 +225,7 @@ const Appointments = ({appointment}) => {
             <p>{appointment.end}</p>
             <p>{appointment.employee}</p>
             <p>{appointment.customer}</p>
-          </li>
-        ))}
-      </p>
+          
       <button
               onClick={(_) => {
                 ChangeAppointment(appointment);
@@ -202,6 +241,27 @@ const Appointments = ({appointment}) => {
             >
               Delete appointment
             </button>
+            </li>
+        ))}
+            </p>
+            <div>
+        <button
+          onClick={(_) => {
+            setPage(page + 1);
+          }}
+          style={{ display: isNotLastPage ? "initial" : "none" }}
+        >
+          Next
+        </button>
+        <button
+          onClick={(_) => {
+            setPage(page - 1);
+          }}
+          style={{ display: page > 1 ? "initial" : "none" }}
+        >
+          Previous
+        </button>
+      </div>
     </div>
   );
 };
@@ -232,7 +292,12 @@ export async function getServerSideProps({req, res}) {
   }
   else {
     return {
-      props: {appointment:appointment.appointments}, 
+      props: {
+        appointment: appointment.appointments,
+        customerIdsM: appointment.customerIds,
+        employeeIdsM: appointment.employeeIds,
+        isNotLastPage: appointment.isNotLastPage
+      }, 
     }
   }
 }
