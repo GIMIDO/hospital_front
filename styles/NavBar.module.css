@@ -1,0 +1,16 @@
+.Link {
+    padding: 10px 20px;
+    margin-left: 5px;
+    font-size: 16px;
+    /* line-height: 24px; */
+    box-shadow: inset 0 0 1px 1px #0000002f;
+    border-radius: 6px;
+}
+.Link:hover {
+    box-shadow: none;
+    background: #4557ff2f;
+}
+
+.navDiv {
+    height: 100%;
+}

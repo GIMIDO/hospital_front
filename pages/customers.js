@@ -7,6 +7,7 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 import Layout from "../components/Layout";
 
+// import styles from "../styles/Page.module.css";
 
 const Customers = ({ customer, isNotLastPage_, username, role }) => {
   const [customerList, setCustomers] = useState(customer);
@@ -21,7 +22,6 @@ const Customers = ({ customer, isNotLastPage_, username, role }) => {
 
   const client = new W3CWebSocket("ws://localhost:3001/ws");
   const [wsUpdate, setWsUpdate] = useState(0);
-
 
   useEffect(() => {
     async function getCustomers() {
@@ -52,45 +52,51 @@ const Customers = ({ customer, isNotLastPage_, username, role }) => {
     };
   };
 
-
   async function getListOfCustomers() {
     let data = await customerService.get(page);
     setCustomers(data.customers);
+    setIsNotLastPage(data.isNotLastPage);
   }
 
-
   const DeleteCustomer = async (id) => {
-    let result = await customerService.delete(id);
-    if (result.success != undefined) {
-      client.send(JSON.stringify({ message: "UpdateCustomer" }));
+    let isConfirm = confirm("Сonfirm deletion (" + id + ")");
+    if (isConfirm) {
+      let result = await customerService.delete(id);
+      if (result.success != undefined) {
+        client.send(JSON.stringify({ message: "UpdateCustomer" }));
+      }
     }
   };
-
 
   const SaveData = async (e) => {
     e.preventDefault();
 
     if (id == 0) {
-      let customer = {
-        name: name,
-        email: email,
-        phone: phone,
-        address: address,
-      };
-      let data = { customer: customer };
-
-      await customerService.post(data);
+      let isConfirm = confirm("Сonfirm creation");
+      if (isConfirm) {
+        let customer = {
+          name: name,
+          email: email,
+          phone: phone,
+          address: address,
+        };
+        let data = { customer: customer };
+        await customerService.post(data);
+      }
     } else {
-      let customer = {
-        id: id,
-        name: name,
-        email: email,
-        phone: phone,
-        address: address,
-      };
-      let data = { customer: customer };
+      let isConfirm = confirm("Сonfirm the change (" + id + ")");
+      if (isConfirm) {
+        let customer = {
+          id: id,
+          name: name,
+          email: email,
+          phone: phone,
+          address: address,
+        };
+        let data = { customer: customer };
 
-      await customerService.put(id, data);
+        await customerService.put(id, data);
+      }
     }
 
     client.send(
@@ -100,7 +106,6 @@ const Customers = ({ customer, isNotLastPage_, username, role }) => {
     );
   };
 
-
   const ChangeCustomer = (customer) => {
     setId(customer.id);
     setName(customer.name);
@@ -108,7 +113,6 @@ const Customers = ({ customer, isNotLastPage_, username, role }) => {
     setPhone(customer.phone);
     setAddress(customer.address);
   };
-
 
   const reset = () => {
     setId(0);
@@ -118,120 +122,159 @@ const Customers = ({ customer, isNotLastPage_, username, role }) => {
     setAddress("");
   };
 
-
   return (
     <Layout username={username}>
       <div>
-        <form onSubmit={SaveData}>
-          <div>
-            <label htmlFor="name">Name:</label>
-            <input
-              type={"text"}
-              name="name"
-              value={name}
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="email">Email:</label>
-            <input
-              type={"email"}
-              name="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="phone">Phone:</label>
-            <input
-              type={"text"}
-              name="phone"
-              value={phone}
-              onChange={(e) => {
-                setPhone(e.target.value);
-              }}
-            />
-          </div>
-          <div>
-            <label htmlFor="address">Address:</label>
-            <input
-              type={"text"}
-              name="address"
-              value={address}
-              onChange={(e) => {
-                setAddress(e.target.value);
-              }}
-            />
-          </div>
-          <div>
-            <button id="submit" type={"submit"}>
-              Save
-            </button>
-            <button id="reset" onClick={reset}>
-              Reset
-            </button>
-          </div>
-        </form>
-
-        <h2>Customers:</h2>
-        <p>
-          {customerList.map((user) => (
-            <li key={user.id}>
-              <p>{user.id}</p>
-              <p>{user.name}</p>
-              <p>{user.email}</p>
-              <p>{user.phone}</p>
-              <p>{user.address}</p>
-
-              <button
-                onClick={(_) => {
-                  ChangeCustomer(user);
-                }}
-              >
-                Change customer
-              </button>
-
-              <button
-                onClick={(_) => {
-                  DeleteCustomer(user.id);
-                }}
-              >
-                Delete customer
-              </button>
-            </li>
-          ))}
-        </p>
-
-        <div>
-          <button
-            onClick={(_) => {
-              setPage(page + 1);
-            }}
-            style={{ display: isNotLastPage ? "initial" : "none" }}
+        <div class="w-50">
+          <form
+            onSubmit={SaveData}
+            style={{ display: role === "Doctor" ? "none" : "initial" }}
           >
-            Next
-          </button>
-          <button
-            onClick={(_) => {
-              setPage(page - 1);
-            }}
-            style={{ display: page > 1 ? "initial" : "none" }}
-          >
-            Previous
-          </button>
+            <p>Create/Change form:</p>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="name" class="input-group-text">
+                Name:
+              </label>
+              <input minLength={1} maxLength={50}
+                class="form-control"
+                type={"text"}
+                name="name"
+                value={name}
+                onChange={(e) => {
+                  setName(e.target.value);
+                }}
+              />
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="email" class="input-group-text">
+                Email:
+              </label>
+              <input
+                class="form-control"
+                type={"email"}
+                name="email"
+                value={email}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                }}
+              />
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="phone" class="input-group-text">
+                Phone:
+              </label>
+              <input minLength={1} maxLength={15}
+                class="form-control"
+                type={"text"}
+                name="phone"
+                value={phone}
+                onChange={(e) => {
+                  setPhone(e.target.value);
+                }}
+              />
+            </div>
+            <div class="input-group input-group-sm mb-3">
+              <label htmlFor="address" class="input-group-text">
+                Address:
+              </label>
+              <input minLength={1} maxLength={200}
+                class="form-control"
+                type={"text"}
+                name="address"
+                value={address}
+                onChange={(e) => {
+                  setAddress(e.target.value);
+                }}
+              />
+            </div>
+
+            <div class="btn-group">
+              <button
+                id="submit"
+                type={"submit"}
+                class="btn btn-success btn-sm"
+              >
+                Save
+              </button>
+              <button id="reset" onClick={reset} class="btn btn-warning btn-sm">
+                Reset
+              </button>
+            </div>
+          </form>
         </div>
+        <p class="mt-3 fw-bold fs-3">Customers:</p>
+        <table class="table table-bordered table-striped text-center">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Address</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {customerList.map((user) => (
+              <tr key={user.id}>
+                <td>{user.id}</td>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.phone}</td>
+                <td>{user.address}</td>
+                <td>
+                  <button
+                    onClick={(_) => {
+                      ChangeCustomer(user);
+                    }}
+                    style={{ display: role === "Doctor" ? "none" : "initial" }}
+                    class="btn btn-warning btn-sm"
+                  >
+                    Change
+                  </button>
+
+                  <button
+                    onClick={(_) => {
+                      DeleteCustomer(user.id);
+                    }}
+                    style={{ display: role === "Doctor" ? "none" : "initial" }}
+                    class="btn btn-danger btn-sm"
+                  >
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <button
+          onClick={(_) => {
+            setPage(page - 1);
+          }}
+          style={{ display: page > 1 ? "initial" : "none" }}
+          class="btn btn-primary btn-sm"
+        >
+          Previous
+        </button>
+        <button
+          onClick={(_) => {
+            setPage(page + 1);
+          }}
+          style={{ display: isNotLastPage ? "initial" : "none" }}
+          class="btn btn-primary btn-sm"
+        >
+          Next
+        </button>
       </div>
     </Layout>
   );
 };
 
-
 export default Customers;
-
 
 export async function getServerSideProps({ req, res }) {
   let role = await authService.getRole(req, res);
@@ -246,23 +289,15 @@ export async function getServerSideProps({ req, res }) {
   }
 
   let customer = await customerService.get(1, req, res);
-  if (customer.isRedirect) {
-    return {
-      redirect: {
-        permanent: true,
-        destination: "/",
-      },
-    };
-  } else {
-    return {
-      props: {
-        username: role.name,
-        role: role.role,
 
-        customer: customer.customers,
-        
-        isNotLastPage_: customer.isNotLastPage,
-      },
-    };
-  }
+  return {
+    props: {
+      username: role.name,
+      role: role.role,
+
+      customer: customer.customers,
+
+      isNotLastPage_: customer.isNotLastPage,
+    },
+  };
 }

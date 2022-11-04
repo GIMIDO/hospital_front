@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+
 import authService from "../services/authService";
 
 const Login = () => {
@@ -23,11 +24,10 @@ const Login = () => {
 
   return (
     <form onSubmit={login}>
-      <div>
-        <h2>Login form</h2>
-        <div id="username">
-          <label>User`s name: </label>
-          <br />
+      <div class="container">
+        <h1 class="mt-5 mb-3">Login</h1>
+        <div id="username" class="input-group input-group mb-1">
+          <label class="input-group-text">User`s name: </label>
           <input
             id="userName"
             name="userName"
@@ -35,23 +35,25 @@ const Login = () => {
             onChange={(e) => {
               setUserName(e.target.value);
             }}
+            class="form-control"
           />
         </div>
-        <div id="password">
-          <label>Password: </label>
-          <br />
+        <div id="password" class="input-group input-group mb-1">
+          <label class="input-group-text">Password: </label>
           <input
+          type='password'
             id="passWord"
             name="passWord"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
             }}
+            class="form-control"
           />
         </div>
         <hr />
         <div>
-          <input type={"submit"} value="Log in" id="acceptData" />
+          <input type={"submit"} value="Log in" id="acceptData" class="btn btn-primary"/>
         </div>
       </div>
     </form>

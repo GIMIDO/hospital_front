@@ -1,7 +1,9 @@
+import styles from "../styles/Footer.module.css";
+
 const Footer = () => {
     return (
     <footer>
-        <h1>Copyright@2022</h1>
+        <p className={styles.footerP}>Copyright@2022</p>
     </footer>
     )
 }

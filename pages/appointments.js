@@ -7,9 +7,14 @@ import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 import Layout from "../components/Layout";
 
-
-const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, username, role}) => {
-
+const Appointments = ({
+  appointment,
+  isNotLastPage_,
+  customerIds_,
+  employeeIds_,
+  username,
+  role,
+}) => {
   const [appointmentList, setAppointments] = useState(appointment);
   const [employeeIds, setEmployeeIds] = useState(employeeIds_);
   const [customerIds, setCustomerIds] = useState(customerIds_);
@@ -25,7 +30,6 @@ const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, 
 
   const client = new W3CWebSocket("ws://localhost:3001/ws");
   const [wsUpdate, setWsUpdate] = useState(0);
-
 
   useEffect(() => {
     async function getAppointments() {
@@ -56,7 +60,6 @@ const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, 
     };
   };
 
-
   async function getListOfAppointments() {
     let data = await appointmentService.get(page);
 
@@ -65,57 +68,57 @@ const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, 
     setCustomerIds(data.customerIds);
     setEmployee(data.employeeIds[0]);
     setCustomer(data.customerIds[0]);
-  };
-
+  }
 
   const DeleteAppointment = async (id) => {
-    let result = await appointmentService.delete(id);
-    if (result.success != undefined) {
-      client.send(
-        JSON.stringify({ message: "UpdateAppointment" })
-      );
+    let isConfirm = confirm("Сonfirm deletion (" + id + ")");
+    if (isConfirm) {
+      let result = await appointmentService.delete(id);
+      if (result.success != undefined) {
+        client.send(JSON.stringify({ message: "UpdateAppointment" }));
+      }
     }
   };
-
 
   const SaveData = async (e) => {
     e.preventDefault();
 
     if (id == 0) {
+      let isConfirm = confirm("Сonfirm creation");
+      if (isConfirm) {
+        let appointment = {
+          date: date,
+          start: start,
+          end: end,
+          employee: employee,
+          customer: customer,
+        };
 
-      let appointment = {
-        date: date,
-        start: start,
-        end: end,
-        employee: employee,
-        customer: customer,
-      };
+        let data = { appointment: appointment };
 
-      let data = { appointment: appointment };
-
-      await appointmentService.post(data);
+        await appointmentService.post(data);
+      }
 
     } else {
-      
-      let appointment = {
-        id: id,
-        date: date,
-        start: start,
-        end: end,
-        employee: employee,
-        customer: customer,
-      };
+      let isConfirm = confirm("Сonfirm the change (" + id + ")");
+      if (isConfirm) {
+        let appointment = {
+          id: id,
+          date: date,
+          start: start,
+          end: end,
+          employee: employee,
+          customer: customer,
+        };
 
-      let data = { appointment: appointment };
+        let data = { appointment: appointment };
 
-      await appointmentService.put(id, data);
+        await appointmentService.put(id, data);
+      }
     }
 
-    client.send(
-      JSON.stringify({ message: "UpdateAppointment" })
-    );
+    client.send(JSON.stringify({ message: "UpdateAppointment" }));
   };
-
 
   const ChangeAppointment = (appointment) => {
     setId(appointment.id);
@@ -125,7 +128,6 @@ const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, 
     setEmployee(appointment.employee);
     setCustomer(appointment.customer);
   };
-
 
   const reset = () => {
     setId(0);
@@ -139,120 +141,163 @@ const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, 
   return (
     <Layout username={username}>
       <div>
-        <form
-          id="appointmentForm"
-          onSubmit={SaveData}
-        >
-                  <div>
-                    <label htmlFor="date">Date:</label>
-                    <input
-                      type={"date"}
-                      name="date"
-                      value={date}
-                      onChange={(e) => {
-                        setDate(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="start">Start of appointment:</label>
-                    <input
-                      type={"time"}
-                      name="start"
-                      value={start}
-                      onChange={(e) => {
-                        setstart(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="end">End of appointment:</label>
-                    <input
-                      type={"time"}
-                      name="end"
-                      value={end}
-                      onChange={(e) => {
-                        setend(e.target.value);
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="customer">Customer id:</label>
-                    <select
-                      name="customer"
-                      onChange={(e) => {
-                        setCustomer(e.target.value);
-                      }}
-                      value={customer}
-                    >
-                      {customerIds.map((element) => (
-                        <option key={element} value={element}>
-                          {element}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label htmlFor="employeeSet">Employee Id:</label>
-                    <select
-                      name="employeeSet"
-                      onChange={(e) => {
-                        setEmployee(e.target.value);
-                      }}
-                      value={employee}
-                    >
-                      {employeeIds.map((element) => (
-                        <option key={element} value={element}>
-                          {element}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-          <div>
-            <button id="submit" type={"submit"}>
-              Save
-            </button>
-            <button id="reset" onClick={reset}>
-              Reset
-            </button>
-          </div>
-        </form>
-
-
-        <h2>Appointments:</h2>
-        <p>
-          {appointmentList.map((appointment) => (
-            <li key={appointment.id}>
-              <p>{appointment.date}</p>
-              <p>{appointment.start}</p>
-              <p>{appointment.end}</p>
-              <p>{appointment.employee}</p>
-              <p>{appointment.customer}</p>
-            
-        <button
-                onClick={(_) => {
-                  ChangeAppointment(appointment);
+        <div class="w-50">
+          <form
+            id="appointmentForm"
+            onSubmit={SaveData}
+            style={{ display: role === "Doctor" ? "none" : "initial" }}
+          >
+            <p>Create/Change form:</p>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="date" class="input-group-text">
+                Date:
+              </label>
+              <input
+                type={"date"}
+                name="date"
+                value={date}
+                onChange={(e) => {
+                  setDate(e.target.value);
                 }}
+                class="form-control"
+              />
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="start" class="input-group-text">
+                Start of appointment:
+              </label>
+              <input
+                type={"time"}
+                name="start"
+                value={start}
+                onChange={(e) => {
+                  setstart(e.target.value);
+                }}
+                class="form-control"
+              />
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="end" class="input-group-text">
+                End of appointment:
+              </label>
+              <input
+                type={"time"}
+                name="end"
+                value={end}
+                onChange={(e) => {
+                  setend(e.target.value);
+                }}
+                class="form-control"
+              />
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="customer" class="input-group-text">
+                Customer id:
+              </label>
+              <select
+                name="customer"
+                onChange={(e) => {
+                  setCustomer(e.target.value);
+                }}
+                value={customer}
+                class="form-select"
               >
-                Change appointment
-              </button>
+                {customerIds.map((element) => (
+                  <option key={element} value={element}>
+                    {element}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div class="input-group input-group-sm mb-1">
+              <label htmlFor="employeeSet" class="input-group-text">
+                Employee Id:
+              </label>
+              <select
+                name="employeeSet"
+                onChange={(e) => {
+                  setEmployee(e.target.value);
+                }}
+                value={employee}
+                class="form-select"
+              >
+                {employeeIds.map((element) => (
+                  <option key={element} value={element}>
+                    {element}
+                  </option>
+                ))}
+              </select>
+            </div>
 
+            <div class="btn-group">
               <button
-                onClick={(_) => {
-                  DeleteAppointment(appointment.id);
-                }}
+                id="submit"
+                type={"submit"}
+                class="btn btn-success btn-sm"
               >
-                Delete appointment
+                Save
               </button>
-              </li>
-          ))}
-              </p>
-              <div>
+              <button id="reset" onClick={reset} class="btn btn-warning btn-sm">
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <p class="mt-3 fw-bold fs-3">Appointments:</p>
+        <table class="table table-bordered table-striped text-center">
+          <thead>
+            <tr>
+              <th>Id</th>
+              <th>Date</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Employee</th>
+              <th>Customer</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {appointmentList.map((appointment) => (
+              <tr key={appointment.id}>
+                <td>{appointment.id}</td>
+                <td>{appointment.date}</td>
+                <td>{appointment.start}</td>
+                <td>{appointment.end}</td>
+                <td>{appointment.employee}</td>
+                <td>{appointment.customer}</td>
+                <td>
+                <button
+                  onClick={(_) => {
+                    ChangeAppointment(appointment);
+                  }}
+                  style={{ display: role === "Doctor" ? "none" : "initial" }}
+                  class="btn btn-warning btn-sm"
+                >
+                  Change
+                </button>
+
+                <button
+                  onClick={(_) => {
+                    DeleteAppointment(appointment.id);
+                  }}
+                  style={{ display: role === "Doctor" ? "none" : "initial" }}
+                  class="btn btn-danger btn-sm"
+                >
+                  Delete
+                </button></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div>
           <button
             onClick={(_) => {
               setPage(page + 1);
             }}
             style={{ display: isNotLastPage ? "initial" : "none" }}
+            class="btn btn-primary btn-sm"
           >
             Next
           </button>
@@ -261,6 +306,7 @@ const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, 
               setPage(page - 1);
             }}
             style={{ display: page > 1 ? "initial" : "none" }}
+            class="btn btn-primary btn-sm"
           >
             Previous
           </button>
@@ -272,40 +318,30 @@ const Appointments = ({appointment, isNotLastPage_, customerIds_, employeeIds_, 
 
 export default Appointments;
 
-
-export async function getServerSideProps({req, res}) {
-  let role = await authService.getRole(req, res)
+export async function getServerSideProps({ req, res }) {
+  let role = await authService.getRole(req, res);
 
   if (role === undefined) {
     return {
       redirect: {
-         permanent: true,
-         destination: '/'
-      }
-   }
+        permanent: true,
+        destination: "/",
+      },
+    };
   }
 
   let appointment = await appointmentService.get(1, req, res);
-  if (appointment.isRedirect) {
-    return {
-       redirect: {
-          permanent: true,
-          destination: '/'
-       }
-    }
-  }
-  else {
-    return {
-      props: {
-        username: role.name,
-        role: role.role,
 
-        appointment: appointment.appointments,
-        customerIds_: appointment.customerIds,
-        employeeIds_: appointment.employeeIds,
+  return {
+    props: {
+      username: role.name,
+      role: role.role,
 
-        isNotLastPage_: appointment.isNotLastPage
-      }, 
-    }
-  }
+      appointment: appointment.appointments,
+      customerIds_: appointment.customerIds,
+      employeeIds_: appointment.employeeIds,
+
+      isNotLastPage_: appointment.isNotLastPage,
+    },
+  };
 }

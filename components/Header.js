@@ -1,7 +1,9 @@
+import styles from "../styles/Header.module.css";
+
 const Header = () => {
     return (
     <header>
-        <h1>Hospital</h1>
+        <h1 className={styles.h1}>Hospital</h1>
     </header>
     )
 }

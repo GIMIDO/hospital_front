@@ -1,0 +1,74 @@
+.pageForm {
+    display: flex;
+    width: max-content;
+    box-shadow: inset 0 0 1px 1px #0000002f;
+    border-radius: 6px;
+    padding: 10px 10px;
+}
+
+.formLabels {
+    display: flex;
+    flex-direction: column;
+}
+.formLabels > label {
+    margin: 2px 0;
+}
+
+.formInputs {
+    margin-left: 10px;
+    display: flex;
+    flex-direction: column;
+}
+.formInputs > input {
+    width: 200px;
+    margin: 2px 0;
+    border: 1px solid #0000002f;
+    font-size: 14px;
+    outline: none;
+    border-radius: 6px;
+}
+.formInputs > select {
+    width: 200px;
+    margin: 2px 0;
+    border: 1px solid #0000002f;
+    font-size: 14px;
+    outline: none;
+    border-radius: 6px;
+}
+
+.table {
+    width: 100%;
+    text-align: center;
+}
+
+.tableButton {
+    width: 10%;
+}
+
+.buttonPage {
+    border-radius: 6px;
+    margin: 0 2px;
+    padding: 5px 10px;
+    background: none;
+    border: 1px solid #0000002f;
+}
+.buttonPage:hover {
+    background: #0000002f;
+    cursor: pointer;
+}
+
+.pagination {
+    margin-top: 10px;
+}
+
+.form_buttonPage {
+    margin-top: 10px;
+    border-radius: 6px;
+    padding: 5px 10px;
+    background: none;
+    border: 1px solid #0000002f;
+}
+.form_buttonPage:hover {
+    background: #7affdc2f;
+    cursor: pointer;
+}
